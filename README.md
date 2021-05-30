@@ -5,8 +5,6 @@ The run arguments for these configured states are stored in the settings.json fi
 ## Generating settings.json
 The settings.json file can be created using the following command (this will not overwrite an existing file)
 ```shell
-./srv.py -e
-# or
 python3 srv.py -e
 ```
 
@@ -36,15 +34,11 @@ The default contents of the settings file is as follows:
 ## Running
 The server can be run with the mode stored in the settings.json file with the following command:
 ```shell
-./srv.py
-# or
 python srv.py
 ```
 
 A server can be launched in a specified mode via the following:
 ```shell
-./srv.py sandbox
-# or
 python srv.py sandbox
 ```
 
