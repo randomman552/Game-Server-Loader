@@ -10,7 +10,8 @@ settings_path = "settings.json"
 default_settings = {
     "default": "+maxplayers 32 -console -norestart -usercon",
     "unspecified": "+gamemode sandbox +host_workshop_collection 2036327578 +map gm_genesis",
-    "exe": "./srcds_run",
+    "update": "./update.sh",
+    "start": "./srcds_run",
     "mode": "sandbox",
     "mode map": {
         "sandbox": "+host_workshop_collection 2035084436 +gamemode sandbox +map gm_genesis",
@@ -43,9 +44,11 @@ def read_settings() -> dict:
     return settings
 
 
+# region Parsing arguments
 settings = read_settings()
 
-# Parse script arguments
+# region Parse arguments
+# region Create argparse.ArgumentParser
 parser = argparse.ArgumentParser(
     description="Launch a server with specified arguments. By default will check for a file called server.mode which "
                 "will contain the mode to launch for."
@@ -60,6 +63,7 @@ parser.add_argument("-e", "--exit",
                     help="Flag to immediately exit after config changes",
                     action="store_true"
                     )
+# endregion
 args = parser.parse_args()
 
 # If mode is passed as part of command, save new mode to file
@@ -67,43 +71,66 @@ if args.mode:
     settings["mode"] = args.mode
     print(f"Mode changed to {args.mode}...")
     write_settings(settings)
+# endregion
+
+# Get required settings
+start_cmd = settings.get("start")
+
+# Get optional settings
+update_cmd = settings.get("update", "")
+default_args = settings.get("default", "")
+unspecified = settings.get("unspecified", "")
+mode = settings.get("mode", "")
+mode_map = settings.get("mode map", dict())
+
+# Exit if start_cmd not provided
+if not start_cmd:
+    sys.exit(2)
+
+# region Check settings values are valid
+if not start_cmd:
+    print("Start not specified, please check your settings.")
+# endregion
+
+# Join together args to form command
+cmd = " ".join([start_cmd, default_args, mode_map.get(mode, unspecified)])
+# endregion
 
 # Exit if requested
 if args.exit:
     print("Exiting...")
     sys.exit(0)
 
-# Check executable exists
-if not os.path.exists(settings.get("exe")):
-    print(f"'{settings.get('exe')} not found. Set it correctly in settings.json...")
-    sys.exit(1)
+# region Run update command if specified
+if update_cmd:
+    print(f"Running update command: {update_cmd}")
+    update_process = None
+    try:
+        update_process = subprocess.run(update_cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stdout, shell=True)
+    except subprocess.SubprocessError as e:
+        if update_process:
+            sys.exit(update_process.returncode)
+    except KeyboardInterrupt:
+        print("Update cancelled, closing")
+        sys.exit(1)
+else:
+    print("Skipping update...")
+# endregion
 
-# Join together args to form command
-exe = settings.get("exe")
-default_args = settings.get("default")
-mode = settings.get("mode")
-unspecified = settings.get("unspecified")
-mode_map = settings.get("mode map")
-
-cmd = " ".join([exe, default_args, mode_map.get(mode, unspecified)])
+# region Start server
 
 print(f"Mode: '{mode}'")
 print(f"Opening '{cmd}'...")
 try:
-    # Input and input from the process are redirected to python shell
-    process = subprocess.run(cmd, stdin=sys.stdin,
-                             stdout=sys.stdout, stderr=sys.stdout, shell=True)
-# Customise exception behavior below
-except subprocess.TimeoutExpired:
-    pass
-except subprocess.CalledProcessError:
-    pass
-except subprocess.SubprocessError:
+    process = subprocess.run(cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stdout, shell=True)
+except subprocess.SubprocessError as e:
     pass
 except KeyboardInterrupt:
     print("Server closed...")
 else:
     print(f"Server closed with code {process.returncode}")
+    print(process.stderr)
     sys.exit(process.returncode)
 
 sys.exit(0)
+# endregion
