@@ -34,12 +34,12 @@ The default contents of the settings file is as follows:
 ## Running
 The server can be run with the mode stored in the settings.json file with the following command:
 ```shell
-python srv.py
+python3 srv.py
 ```
 
 A server can be launched in a specified mode via the following:
 ```shell
-python srv.py sandbox
+python3 srv.py sandbox
 ```
 
 ### Examples
