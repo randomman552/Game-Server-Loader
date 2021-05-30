@@ -2,6 +2,12 @@
 A python script used to start video game servers with multiple preconfigured states.\
 The run arguments for these configured states are stored in the settings.json file.
 
+## Downloading
+Script can be downloaded with the following command using wget:
+```shell
+wget https://github.com/randomman552/Game-Server-Loader/releases/download/latest/srv.py
+```
+
 ## Generating settings.json
 The settings.json file can be created using the following command (this will not overwrite an existing file)
 ```shell
