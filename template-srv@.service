@@ -1,0 +1,15 @@
+# Template provided by for use with:
+# https://github.com/randomman552/Game-Server-Loader
+[Unit]
+Description=Template server service
+
+[Service]
+Type=simple
+User=user
+Environment="SCRIPT_ARGS=%I"
+WorkingDirectory=/path/to/working/directory
+ExecStart=/path/to/working/directory/srv.py $SCRIPT_ARGS
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

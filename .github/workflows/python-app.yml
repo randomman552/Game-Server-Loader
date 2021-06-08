@@ -43,4 +43,6 @@ jobs:
         prerelease: false
         automatic_release_tag: "latest"
         title: "Latest Build"
-        files: "srv.py"
+        files: |
+        "srv.py"
+        "template-srv@.service"
